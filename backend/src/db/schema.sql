@@ -1,0 +1,42 @@
+-- Comentário: Esquema PostgreSQL principal do LingoQuestions.
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  name VARCHAR(120) NOT NULL,
+  xp INTEGER NOT NULL DEFAULT 0,
+  level INTEGER NOT NULL DEFAULT 1,
+  streak INTEGER NOT NULL DEFAULT 0,
+  last_study_date TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS lessons (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(120) NOT NULL,
+  description TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS questions (
+  id SERIAL PRIMARY KEY,
+  lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  prompt TEXT NOT NULL,
+  options JSONB NOT NULL,
+  correct_option INTEGER NOT NULL,
+  difficulty INTEGER NOT NULL DEFAULT 1,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS attempts (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  question_id INTEGER NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+  selected_option INTEGER NOT NULL,
+  correct BOOLEAN NOT NULL,
+  ease_factor NUMERIC(4,2) NOT NULL DEFAULT 2.5,
+  interval_days INTEGER NOT NULL DEFAULT 1,
+  next_review_at TIMESTAMPTZ NOT NULL,
+  xp_gained INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
